@@ -1,5 +1,6 @@
 <!-- BudgetTable.vue -->
 <script setup>
+import { ref, computed } from 'vue'
 import BudgetSummary from './BudgetSummary.vue'
 
 const props = defineProps({
@@ -9,20 +10,25 @@ const props = defineProps({
   },
 })
 
-// Обработка удаления — через $emit в шаблоне (defineEmits не обязателен, но лучше указать)
 defineEmits(['delete'])
 
-// Вычисляемое свойство для отсортированного списка (без мутации оригинала!)
-import { computed } from 'vue'
-const sortedTransactions = computed(() => {
-  return [...props.transactions].sort((a, b) => b.amount - a.amount)
-})
+// Направление сортировки: true — по убыванию (от большего к меньшему)
+const sortDesc = ref(true)
 
-const sortByAmount = () => {
-  // Теперь сортируем не напрямую, а через computed — ничего не мутируем!
-  // Фактически, переключение порядка сортировки можно добавить позже.
-  // Пока просто используем sortedTransactions в шаблоне.
+// Переключение направления
+const toggleSort = () => {
+  sortDesc.value = !sortDesc.value
 }
+
+// Отсортированный массив (без мутации props!)
+const sortedTransactions = computed(() => {
+  const sorted = [...props.transactions]
+  if (sortDesc.value) {
+    return sorted.sort((a, b) => b.amount - a.amount) // убывание
+  } else {
+    return sorted.sort((a, b) => a.amount - b.amount) // возрастание
+  }
+})
 </script>
 
 <template>
@@ -35,8 +41,10 @@ const sortByAmount = () => {
           <th class="p-2">Название</th>
           <th class="p-2">Тип</th>
           <th class="p-2">
-            <!-- Кнопка для сортировки (пока только по убыванию) -->
-            <button @click="sortByAmount" class="text-left underline">Сумма</button>
+            <!-- Кнопка для переключения сортировки -->
+            <button @click="toggleSort" class="text-left underline cursor-pointer">
+              Сумма {{ sortDesc ? '↓' : '↑' }}
+            </button>
           </th>
           <th class="p-2">Действия</th>
         </tr>

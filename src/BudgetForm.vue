@@ -13,7 +13,7 @@ const handleSubmit = () => {
 
   emit('add', {
     name: name.value.trim(),
-    amount: parseFloat(amount.value),
+    amount: Math.abs(parseFloat(amount.value)),
     type: type.value,
   })
 
